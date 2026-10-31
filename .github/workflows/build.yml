@@ -26,9 +26,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Capacitor and Android Platform
+      - name: Prepare Web Assets and Capacitor
         run: |
           npm install @capacitor/cli @capacitor/core @capacitor/android
+          mkdir -p www
+          cp index.html www/
           npx cap add android
 
       - name: Copy web assets and update Android
