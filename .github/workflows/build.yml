@@ -30,8 +30,9 @@ jobs:
         run: |
           npm install @capacitor/cli @capacitor/core
           npm install @capacitor/android
-          npx cap init --web-dir .
+          npx cap init app --web-dir . --bundle-id com.physics.app
           npx cap add android
+          npx cap update android
 
       - name: Copy web assets to Android
         run: npx cap copy android
