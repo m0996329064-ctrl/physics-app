@@ -32,29 +32,3 @@ jobs:
           mkdir -p www
           cp index.html www/
           npx cap add android
-          
-- name: Prepare Web Assets and Capacitor
-  run: |
-    npm install @capacitor/cli @capacitor/core
-    npm install @capacitor-assets/cli --save-dev
-    mkdir -p www
-    cp index.html www/
-    npx cap add android
-    npx capacitor-assets generate --icon icon.png
-
-      - name: Copy web assets and update Android
-        run: |
-          npx cap copy android
-          npx cap update android
-
-      - name: Build APK with Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: physics-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
