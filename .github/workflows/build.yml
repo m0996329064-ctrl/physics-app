@@ -32,6 +32,15 @@ jobs:
           mkdir -p www
           cp index.html www/
           npx cap add android
+          
+- name: Prepare Web Assets and Capacitor
+  run: |
+    npm install @capacitor/cli @capacitor/core
+    npm install @capacitor-assets/cli --save-dev
+    mkdir -p www
+    cp index.html www/
+    npx cap add android
+    npx capacitor-assets generate --icon icon.png
 
       - name: Copy web assets and update Android
         run: |
