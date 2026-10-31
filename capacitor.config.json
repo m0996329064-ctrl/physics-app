@@ -1,5 +1,6 @@
 {
-  "appId": "com.hamada.physics",
-  "appName": "منصة الفيزياء",
-  "webDir": "www"
+  "appId": "com.physics.app",
+  "appName": "حمادة للفيزياء",
+  "webDir": ".",
+  "bundledWebRuntime": false
 }
