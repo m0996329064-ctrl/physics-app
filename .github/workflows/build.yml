@@ -26,10 +26,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install Capacitor Core & Android Platform
+      - name: Initialize Capacitor and Add Android
         run: |
-          npm install @capacitor/cli @capacitor/core
-          npm install @capacitor/android
+          npm install @capacitor/cli @capacitor/core @capacitor/android
+          npx cap init app com.physics.app --web-dir . --yes
           npx cap add android
 
       - name: Copy web assets to Android
