@@ -53,6 +53,8 @@ button.opt{font-size:20px;line-height:1.9}button.opt .katex{font-size:1.15em}
 .sol{background:linear-gradient(135deg,#1565c0aa,#4527a0aa);border-right:6px solid #69f0ae;border-radius:12px;padding:12px;margin:12px 0;font-size:21px;line-height:2;color:#e8f5e9;white-space:pre-wrap;box-shadow:0 6px 12px #0005}.sol .katex{font-size:1.25em}.sol b{color:#69f0ae;display:block}
 .qimg{display:block;max-width:100%;width:auto;height:auto;object-fit:contain;margin:10px auto;border-radius:10px;background:#fff;padding:4px}
 .vw img{width:100%;height:auto;object-fit:contain}
+button.opt{white-space:nowrap;overflow-x:auto;overflow-y:hidden;font-size:24px;font-weight:700;line-height:1.8;text-align:right}button.opt .katex{font-size:1.1em}
+.sol .sa{font-size:26px;white-space:nowrap;overflow-x:auto;font-weight:700}
 .tile b{display:block;font-size:44px;line-height:1.5;padding:4px 0;overflow:visible;filter:none;text-shadow:0 6px 8px #0008;animation:fl2 3s ease-in-out infinite}
 @keyframes fl2{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 </style></head><body><button id="mus" onclick="togMus()">🎵</button><div id="app"></div><div id="toast"></div>
@@ -130,12 +132,12 @@ function go(v){view=v;ctx.run++;if(v=='admin')ctx.edit=false;stopTTS();R()}
 const tok=s=>String(s).split(/(\$\$[^$]+\$\$|\$[^$]+\$)/).filter(Boolean);
 function addM(el,t){const s=document.createElement('span');el.appendChild(s);try{katex.render(t.replace(/^\$+|\$+$/g,''),s,{displayMode:/^\$\$/.test(t),throwOnError:false})}catch(e){s.textContent=t}}
 function fill(el,s){el.innerHTML='';tok(s).forEach(t=>t[0]=='$'?addM(el,t):el.appendChild(document.createTextNode(t)))}
-async function typeIn(el,s,id){el.innerHTML='';for(const t of tok(s)){if(t[0]=='$')addM(el,t);else for(const c of t){if(id!==ctx.run)return 0;el.appendChild(document.createTextNode(c));await sleep(28)}}return 1}
+async function typeIn(el,s,id){el.innerHTML='';for(const t of tok(s)){if(t[0]=='$')addM(el,t);else for(const c of t){if(id!==ctx.run)return 0;el.appendChild(document.createTextNode(c));await sleep(58)}}return 1}
 /* ---------- sound ---------- */
 async function nat(m,o){const C=window.Capacitor,P=C&&C.Plugins&&C.Plugins.TextToSpeech;if(P&&P[m])return P[m](o);if(C&&C.nativePromise)return C.nativePromise('TextToSpeech',m,o||{});throw new Error('no native')}
-async function say(t){try{const C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){try{await nat('stop',{})}catch(e){}await nat('speak',{text:t,lang:'ar-SA',rate:.95,pitch:1,volume:1,category:'ambient',queueStrategy:0});return}}catch(e){}
+async function say(t){if(S&&S.cfg.voice===false)return;try{const C=window.Capacitor;if(C&&C.isNativePlatform&&C.isNativePlatform()){try{await nat('stop',{})}catch(e){}await nat('speak',{text:t,lang:'ar-SA',rate:.95,pitch:1,volume:1,category:'ambient',queueStrategy:0});return}}catch(e){}
 try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';speechSynthesis.speak(u)}catch(e){toast('⚠ لا يوجد صوت قراءة: ثبّت «Speech Services by Google» وصوت العربية من إعدادات الهاتف')}}
-const clean=s=>String(s).replace(/\$+/g,' ').replace(/\\[a-zA-Z]+/g,' ').replace(/[{}^_]/g,' ');
+const clean=s=>String(s).replace(/\$+/g,' ').replace(/\\[a-zA-Z]+/g,' ').replace(/\\[,;:! ]/g,' ').replace(/[{}^_]/g,' ');
 function startMusic(){if(started||!S.cfg.songs.length)return;started=true;aud.src=S.cfg.songs[S.cfg.si%S.cfg.songs.length].d;aud.loop=true;aud.volume=.35;S.cfg.si++;save();syncMusic()}
 function togMus(){musicOn=!musicOn;$('#mus').textContent=musicOn?'🎵':'🔇';if(!started)return startMusic();syncMusic()}
 function syncMusic(){if(!started)return;(musicOn&&view=='login')?aud.play().catch(()=>{}):aud.pause()}
@@ -147,7 +149,7 @@ const V={
 login:()=>hero()+`<div class="ph">${P[0]}</div><div class="card"><input id="n" placeholder="الاسم"><input id="i" placeholder="اسم المعهد أو المدرسة"><input id="p" type="password" autocapitalize="off" autocomplete="off" placeholder="كلمة السر (اخترها بنفسك)"><button style="width:100%" onclick="login()">دخول</button><input id="ap" type="password" autocapitalize="off" autocomplete="off" placeholder="كلمة سر المدير" style="display:none"><button class="ghost" style="width:100%" onclick="adminLogin()">🔐 دخول المدير</button></div>`,
 home:()=>hero()+`<div class="ph" id="ph">${P[0]}</div><div class="card">👋 أهلاً ${esc(user.n)} — ${esc(user.i)}</div><div class="grid"><div class="tile" onclick="go('lib_notes')"><b>📒</b>النوط</div><div class="tile" onclick="go('quizzes')"><b>❓</b>الأسئلة المؤتمتة</div><div class="tile" onclick="go('lib_videos')"><b>🎬</b>تجارب وفيديو</div><div class="tile" onclick="go('lib_past')"><b>📚</b>دورات سابقة + حلول</div></div><button class="ghost" style="width:100%;margin-top:12px" onclick="go('rank')">🏆 ترتيب المعهد / المدرسة</button><button class="ghost" style="width:100%" onclick="sync(1)">🔄 تحديث المحتوى</button><button class="red" style="width:100%" onclick="user=null;go('login')">خروج</button>`,
 quizzes:()=>back()+`<h2>❓ الأسئلة المؤتمتة</h2>`+(S.quizzes.map((q,i)=>`<div class="card row"><span>${esc(q.title)}<br><small>${q.qs.filter(x=>x.a>=0).length} سؤال</small></span><button onclick="startQuiz(${i})">ابدأ</button></div>`).join('')||'<div class="card">لا توجد اختبارات بعد</div>'),
-quiz:()=>{const c=ctx;return `<div class="card"><div class="row"><b>سؤال ${c.i+1} / ${c.qs.length}</b><button onclick="readQ()">🔊 اقرأ السؤال</button></div><div id="qt" class="qt"></div><div id="qi"></div><div id="gv"></div><div id="op"></div><div id="nx"></div></div>`},
+quiz:()=>{const c=ctx;return `<div class="card"><div class="row"><b>سؤال ${c.i+1} / ${c.qs.length}</b><button id="vb" onclick="togVoice()">${S.cfg.voice===false?'🔇':'🔊'}</button></div><div id="qt" class="qt"></div><div id="qi"></div><div id="gv"></div><div id="op"></div><div id="nx"></div></div>`},
 end:()=>`<div class="card hero"><h2>انتهى الاختبار 🎉</h2><div style="font-size:48px;color:#ffd54f">${ctx.fin} / 10</div><p style="font-size:18px">${esc(ctx.cheer)}</p></div><button style="width:100%" onclick="go('home')">الرئيسية</button>`,
 rank:()=>back()+`<h2>🏆 الترتيب</h2>`+rank(),
 item:()=>back('lib_'+ctx.k)+`<h2>${esc(ctx.it.t)}</h2>`+(ctx.it.u?`<div class="card"><a style="color:#ffd54f" target="_blank" href="${esc(ctx.it.u)}">🔗 فتح الرابط</a></div>`:'')+ctx.it.f.map((f,j)=>`<div class="card"><b>${j?'الحل':'الملف'}: ${esc(f.n)}</b><div class="vw" data-j="${j}"></div></div>`).join(''),
@@ -247,9 +249,11 @@ function adminLogin(){const e=$('#ap');if(e.style.display=='none'){e.style.displ
 if(e.value.trim().toLowerCase()===String(S.cfg.adminPass).trim().toLowerCase()){user={admin:1,n:'المدير',i:'—'};go('admin')}else toast('كلمة السر خاطئة')}
 /* ---------- quiz ---------- */
 function startQuiz(i){const qs=S.quizzes[i].qs.filter(q=>q.a>=0&&q.o.length>1);if(!qs.length)return toast('لا أسئلة صالحة');ctx={run:ctx.run+1,qi:i,qs,i:0,score:0,per:10/qs.length};go('quiz')}
-async function startQ(){const c=ctx,q=c.qs[c.i],id=++c.run;c.done=0;if(!await typeIn($('#qt'),q.t,id))return;if(q.i)$('#qi').innerHTML=`<img class="qimg" src="${q.i}" draggable="false" oncontextmenu="return false">`;
+async function startQ(){const c=ctx,q=c.qs[c.i],id=++c.run;c.done=0;if(S.cfg.voice!==false)say(clean(q.t)+(q.g.length?'. المعطيات: '+q.g.map(clean).join('، '):''));if(!await typeIn($('#qt'),q.t,id))return;if(q.i)$('#qi').innerHTML=`<img class="qimg" src="${q.i}" draggable="false" oncontextmenu="return false">`;
 if(q.g.length){const g=$('#gv');g.className='giv';g.innerHTML='<b>📌 المعطيات:</b>';q.g.forEach(x=>{const d=document.createElement('div');g.appendChild(d);fill(d,x)})}
-const op=$('#op');q.o.forEach((o,k)=>{const b=document.createElement('button');b.className='opt';b.onclick=()=>pick(k);fill(b,o);op.appendChild(b)})}
+const op=$('#op');q.o.forEach((o,k)=>{const b=document.createElement('button');b.className='opt';b.onclick=()=>pick(k);fill(b,o);op.appendChild(b)});fitOpts()}
+function togVoice(){S.cfg.voice=S.cfg.voice===false;persist();const b=$('#vb');if(b)b.textContent=S.cfg.voice===false?'🔇':'🔊';if(S.cfg.voice===false)stopTTS();else readQ()}
+function fitOpts(){document.querySelectorAll('.opt').forEach(b=>{let s=24;b.style.fontSize=s+'px';while(b.scrollWidth>b.clientWidth+1&&s>14){s--;b.style.fontSize=s+'px'}})}
 function readQ(){const q=ctx.qs[ctx.i];say(clean(q.t)+'. '+(q.g.length?'المعطيات: '+q.g.map(clean).join('، ')+'. ':'')+q.o.map((o,i)=>'الخيار '+(i+1)+': '+clean(o)).join('. '))}
 function pick(k){const c=ctx,q=c.qs[c.i];if(c.done)return;c.done=1;const bs=document.querySelectorAll('.opt');bs[q.a].classList.add('ok');if(k==q.a){c.score+=c.per;say('أحسنت، بارك الله بك')}else{bs[k].classList.add('no');say('الإجابة خاطئة')}
 const nx=$('#nx');nx.innerHTML='';const sd=document.createElement('div');sd.className='sol';sd.innerHTML='<b>✅ الإجابة الصحيحة:</b><div class="sa"></div>'+(q.s?'<b>📝 الحل:</b><div class="ss"></div>':'');nx.appendChild(sd);fill(sd.querySelector('.sa'),q.o[q.a]);if(q.s)fill(sd.querySelector('.ss'),q.s);nx.insertAdjacentHTML('beforeend',`<button style="width:100%" onclick="nextQ()">${c.i+1<c.qs.length?'التالي ➡':'إنهاء ✅'}</button>`);try{sd.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}}
