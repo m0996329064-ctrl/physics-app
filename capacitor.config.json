@@ -1,5 +1,9 @@
 {
   "appId": "com.hamada.physics",
   "appName": "حمادة للفيزياء",
-  "webDir": "www"
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  }
 }
