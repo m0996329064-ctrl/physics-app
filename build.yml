@@ -28,14 +28,19 @@ jobs:
           cat > "$D/SecurePlugin.java" <<'EOF'
           package com.hamada.physics;
 
+          import android.content.Intent;
+          import android.speech.tts.TextToSpeech;
           import android.view.WindowManager;
+          import com.getcapacitor.JSObject;
           import com.getcapacitor.Plugin;
           import com.getcapacitor.PluginCall;
           import com.getcapacitor.PluginMethod;
           import com.getcapacitor.annotation.CapacitorPlugin;
+          import java.util.Locale;
 
           @CapacitorPlugin(name = "Secure")
           public class SecurePlugin extends Plugin {
+
               @PluginMethod
               public void set(final PluginCall call) {
                   final boolean on = call.getBoolean("on", true);
@@ -48,6 +53,56 @@ jobs:
                               getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
                           }
                           call.resolve();
+                      }
+                  });
+              }
+
+              @PluginMethod
+              public void exitApp(final PluginCall call) {
+                  getActivity().runOnUiThread(new Runnable() {
+                      @Override
+                      public void run() {
+                          getActivity().finishAffinity();
+                      }
+                  });
+                  call.resolve();
+              }
+              @PluginMethod
+              public void ensureVoice(final PluginCall call) {
+                  final TextToSpeech[] holder = new TextToSpeech[1];
+                  holder[0] = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
+                      @Override
+                      public void onInit(int status) {
+                          JSObject res = new JSObject();
+                          boolean ok = false;
+                          boolean opened = false;
+                          try {
+                              if (status == TextToSpeech.SUCCESS && holder[0] != null) {
+                                  int r = holder[0].isLanguageAvailable(new Locale("ar"));
+                                  ok = r >= TextToSpeech.LANG_AVAILABLE;
+                                  if (!ok) {
+                                      try {
+                                          Intent i = new Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                                          i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                          getActivity().startActivity(i);
+                                          opened = true;
+                                      } catch (Exception e) {
+                                          opened = false;
+                                      }
+                                  }
+                              }
+                          } catch (Exception e) {
+                              ok = false;
+                          }
+                          try {
+                              if (holder[0] != null) {
+                                  holder[0].shutdown();
+                              }
+                          } catch (Exception e) {
+                          }
+                          res.put("ok", ok);
+                          res.put("opened", opened);
+                          call.resolve(res);
                       }
                   });
               }
